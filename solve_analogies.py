@@ -11,7 +11,6 @@
 import os
 from PIL import Image
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 # function to read in all 8 images from problem
@@ -41,20 +40,6 @@ def read_in_images(path):
 
     # plt.imshow(A, cmap='binary')
     # plt.show()
-    # plt.imshow(B, cmap='binary')
-    # plt.show()
-    # plt.imshow(C, cmap='binary')
-    # plt.show()
-    # plt.imshow(a1, cmap='binary')
-    # plt.show()
-    # plt.imshow(a2, cmap='binary')
-    # plt.show()
-    # plt.imshow(a3, cmap='binary')
-    # plt.show()
-    # plt.imshow(a4, cmap='binary')
-    # plt.show()
-    # plt.imshow(a5, cmap='binary')
-    # plt.show()
 
     return A, B, C, a1, a2, a3, a4, a5
 
@@ -80,15 +65,15 @@ def analyze_differences(A, B, C, a1, a2, a3, a4, a5):
             ans = C - a4
         elif i == 4:
             ans = C - a5
-        # ABS TOTAL OR INDIVIDUAL?
-        compare_map[i, 0] = abs(sum(sum(ab_diff[0:int(rows/2), 0:int(cols/2)]))) - \
-            abs(sum(sum(ans[0:int(rows/2), 0:int(cols/2)])))
-        compare_map[i, 1] = abs(sum(sum(ab_diff[0:int(rows/2), int(cols/2):cols]))) - \
-            abs(sum(sum(ans[0:int(rows/2), int(cols/2):cols])))
-        compare_map[i, 2] = abs(sum(sum(ab_diff[int(rows/2):rows, 0:int(cols/2)]))) - \
-            abs(sum(sum(ans[int(rows/2):rows, 0:int(cols/2)])))
-        compare_map[i, 3] = abs(sum(sum(ab_diff[int(rows/2):rows, int(cols/2):cols]))) - \
-            abs(sum(sum(ans[int(rows/2):rows, int(cols/2):cols])))
+        # difference maps between each quadrant
+        compare_map[i, 0] = abs(sum(sum(ab_diff[0:int(rows/2), 0:int(cols/2)])) - \
+            sum(sum(ans[0:int(rows/2), 0:int(cols/2)])))
+        compare_map[i, 1] = abs(sum(sum(ab_diff[0:int(rows/2), int(cols/2):cols])) - \
+            sum(sum(ans[0:int(rows/2), int(cols/2):cols])))
+        compare_map[i, 2] = abs(sum(sum(ab_diff[int(rows/2):rows, 0:int(cols/2)])) - \
+            sum(sum(ans[int(rows/2):rows, 0:int(cols/2)])))
+        compare_map[i, 3] = abs(sum(sum(ab_diff[int(rows/2):rows, int(cols/2):cols])) - \
+            sum(sum(ans[int(rows/2):rows, int(cols/2):cols])))
 
     return compare_map
 
@@ -96,15 +81,15 @@ def analyze_differences(A, B, C, a1, a2, a3, a4, a5):
 # function to find answers with min difference between differences
 def best_answer(compare_map):
 
-    # use sum or average of quadrants to find MIN INDEX
-    # quads = np.average(compare_map, axis=1)
+    # use sum or average of quadrants
+    quads = np.average(compare_map, axis=1)
     # quads = np.sum(compare_map, axis=1)
+
+    # find MIN INDEX
     # min_ans = quads.min()
     # min_idx = np.where(quads == min_ans)[0][0] + 1
 
-    # use sum or average of quadrants to find ODERING BY SMALLEST
-    quads = np.average(compare_map, axis=1)
-    # quads = np.sum(compare_map, axis=1)
+    # find ODERING BY SMALLEST
     min_idx = np.argsort(quads) + 1
 
     # skip answers that match exactly C???
@@ -115,8 +100,9 @@ def best_answer(compare_map):
 # Main function to solve geometric analogy problems
 def main():
 
+    problem = 'm1'
     basedir = '/Users/deirdre/Documents/ImageryAI/Assignment1/'
-    path = os.path.join(basedir, 'analogy problems 1-15', 'm1')
+    path = os.path.join(basedir, 'analogy problems 1-15', problem)
 
     # read in images for problem
     A, B, C, a1, a2, a3, a4, a5 = read_in_images(path)
@@ -130,11 +116,26 @@ def main():
 
     # choose best answer
     choice = best_answer(compare_map)
-    print("The answer in order of highest matching:")
+    print(problem + " answer in order of highest matching:")
     for c in choice:
         print("Answer " + str(c))
 
-    ################ AS IS GIVES 7 CORRECT ANSWERS 1 2 3 5 8 11 15 ###############
+    ################ ANSWERS ###############
+    # Problem 1 Answer: 2 *
+    # Problem 2 Answer: 2 *
+    # Problem 3 Answer: 4 *
+    # Problem 4 Answer: 4
+    # Problem 5 Answer: 3 *
+    # Problem 6 Answer: 1
+    # Problem 7 Answer: 1
+    # Problem 8 Answer: 2 *
+    # Problem 9 Answer: 5 *
+    # Problem 10 Answer: 5
+    # Problem 11 Answer: 3 *
+    # Problem 12 Answer: 3
+    # Problem 13 Answer: 2
+    # Problem 14 Answer: 4
+    # Problem 15 Answer: 2 *
 
 
 main()

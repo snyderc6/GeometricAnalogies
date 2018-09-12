@@ -67,7 +67,7 @@ def analyze_differences(A, B, C, a1, a2, a3, a4, a5):
     cols = A.shape[1]
     ab_diff = A - B
 
-    # compare quadrant counts
+    # compare quadrant counts for each answer by each quadrant
     compare_map = np.zeros((5, 4), dtype=float)
     for i in range(5):
         if i == 0:
@@ -80,14 +80,15 @@ def analyze_differences(A, B, C, a1, a2, a3, a4, a5):
             ans = C - a4
         elif i == 4:
             ans = C - a5
-        compare_map[i, 0] = abs(sum(sum(ab_diff[0:int(rows/2), 0:int(cols/2)])) - \
-            sum(sum(ans[0:int(rows/2), 0:int(cols/2)])))
-        compare_map[i, 1] = abs(sum(sum(ab_diff[0:int(rows/2), int(cols/2):cols])) - \
-            sum(sum(ans[0:int(rows/2), int(cols/2):cols])))
-        compare_map[i, 2] = abs(sum(sum(ab_diff[int(rows/2):rows, 0:int(cols/2)])) - \
-            sum(sum(ans[int(rows/2):rows, 0:int(cols/2)])))
-        compare_map[i, 3] = abs(sum(sum(ab_diff[int(rows/2):rows, int(cols/2):cols])) - \
-            sum(sum(ans[int(rows/2):rows, int(cols/2):cols])))
+        # ABS TOTAL OR INDIVIDUAL?
+        compare_map[i, 0] = abs(sum(sum(ab_diff[0:int(rows/2), 0:int(cols/2)]))) - \
+            abs(sum(sum(ans[0:int(rows/2), 0:int(cols/2)])))
+        compare_map[i, 1] = abs(sum(sum(ab_diff[0:int(rows/2), int(cols/2):cols]))) - \
+            abs(sum(sum(ans[0:int(rows/2), int(cols/2):cols])))
+        compare_map[i, 2] = abs(sum(sum(ab_diff[int(rows/2):rows, 0:int(cols/2)]))) - \
+            abs(sum(sum(ans[int(rows/2):rows, 0:int(cols/2)])))
+        compare_map[i, 3] = abs(sum(sum(ab_diff[int(rows/2):rows, int(cols/2):cols]))) - \
+            abs(sum(sum(ans[int(rows/2):rows, int(cols/2):cols])))
 
     return compare_map
 
@@ -95,11 +96,16 @@ def analyze_differences(A, B, C, a1, a2, a3, a4, a5):
 # function to find answers with min difference between differences
 def best_answer(compare_map):
 
-    # use sum or average of quadrants to find min index
+    # use sum or average of quadrants to find MIN INDEX
+    # quads = np.average(compare_map, axis=1)
+    # quads = np.sum(compare_map, axis=1)
+    # min_ans = quads.min()
+    # min_idx = np.where(quads == min_ans)[0][0] + 1
+
+    # use sum or average of quadrants to find ODERING BY SMALLEST
     quads = np.average(compare_map, axis=1)
     # quads = np.sum(compare_map, axis=1)
-    min_ans = quads.min()
-    min_idx = np.where(quads == min_ans)[0][0] + 1
+    min_idx = np.argsort(quads) + 1
 
     # skip answers that match exactly C???
 
@@ -110,7 +116,7 @@ def best_answer(compare_map):
 def main():
 
     basedir = '/Users/deirdre/Documents/ImageryAI/Assignment1/'
-    path = os.path.join(basedir, 'analogy problems 1-15', 'm15')
+    path = os.path.join(basedir, 'analogy problems 1-15', 'm1')
 
     # read in images for problem
     A, B, C, a1, a2, a3, a4, a5 = read_in_images(path)
@@ -124,7 +130,10 @@ def main():
 
     # choose best answer
     choice = best_answer(compare_map)
-    print("The answer is: " + str(choice))
+    print("The answer in order of highest matching:")
+    for c in choice:
+        print("Answer " + str(c))
+
     ################ AS IS GIVES 7 CORRECT ANSWERS 1 2 3 5 8 11 15 ###############
 
 

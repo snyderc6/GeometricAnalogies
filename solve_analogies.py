@@ -96,17 +96,13 @@ def best_answer(compare_map):
 
     return min_idx
 
-
-# Main function to solve geometric analogy problems
-def main():
-
-    problem = 'm1'
-    basedir = '/Users/deirdre/Documents/ImageryAI/Assignment1/'
+# function that solves problems 
+def solve_problem(problem):
+    #basedir = '/Users/deirdre/Documents/ImageryAI/Assignment1/'
+    basedir = '/Users/Caitlin/Desktop/Imagery in AI/Project 1/'
     path = os.path.join(basedir, 'analogy problems 1-15', problem)
-
     # read in images for problem
     A, B, C, a1, a2, a3, a4, a5 = read_in_images(path)
-
     # find rotations if any from A -> B
 
     # find flips if any from A -> B
@@ -116,10 +112,31 @@ def main():
 
     # choose best answer
     choice = best_answer(compare_map)
-    print(problem + " answer in order of highest matching:")
+    #print(problem + " answer in order of highest matching:")
+    answers = []
     for c in choice:
-        print("Answer " + str(c))
+        #print("Answer " + str(c))
+        answers.append(c)
+    return answers
 
+# function that prints the answers in order of highest matching
+def print_answers(answers):
+    for answer in answers:
+        print("Answer " + str(answer))
+
+# Main function to solve geometric analogy problems
+def main():
+    correct_answers = [2,2,4,4,3,1,1,2,5,5,3,3,2,4,2]
+    for i in range(1,16):
+        problem = 'm'
+        problem = problem + str(i)
+        answers = solve_problem(problem)
+        if(answers[0] == correct_answers[i-1]):
+            #system got the answer correct
+            print("Problem " + problem + " answered correctly!")
+        else:
+            print("Problem " + problem + " answers in order of highest matching:")
+            print_answers(answers)
     ################ ANSWERS ###############
     # Problem 1 Answer: 2 *
     # Problem 2 Answer: 2 *

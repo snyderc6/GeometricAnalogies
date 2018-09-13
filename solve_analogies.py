@@ -100,7 +100,7 @@ def best_answer(compare_map):
 # Main function to solve geometric analogy problems
 def main():
 
-    problem = 'm1'
+    problem = 'm15'
     basedir = '/Users/deirdre/Documents/ImageryAI/Assignment1/'
     path = os.path.join(basedir, 'analogy problems 1-15', problem)
 

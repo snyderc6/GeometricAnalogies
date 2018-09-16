@@ -33,6 +33,20 @@ def convert_to_array_map(image):
     array_map = 1 - array_map
     return array_map
 
+# function that returns the number of matching pixels
+def compare_array_maps(image1, image2):
+    diff = image2-image1
+    rows = diff.shape[0]
+    cols = diff.shape[1]
+    counts = abs(sum(diff[0:int(rows), 0:int(cols)]))
+    totalMatching = 0
+    for i in counts:
+        if counts[i] == 0:
+            totalMatching = totalMatching + 1
+    return totalMatching
+
+
+
 # function to get images to array maps
 def images_to_array_maps(A, B, C, a1, a2, a3, a4, a5):
      # read in analogy images
@@ -109,14 +123,29 @@ def best_answer(compare_map):
     return min_idx
 
 # function that attempts to rotate the image A to match image B
-# returns the degree with the highest proportion of matching 
-# pixels after rotation degrees: 45, 90, 135, 180, 225, 270, 315 
-# and the actual proportion
-def check_rotation(A, B):
+# returns the proportion of matching pixels
+def check_rotation(A, B, rot_degree):
 
     # rotate A
-    A_rotated = A.rotate(45)
-    # count nm
+    A_rotated = A.rotate(rot_degree)
+    A_rotated = convert_to_array_map(A_rotated)
+    B = convert_to_array_map(B)
+    rows = B.shape[0]
+    cols = B.shape[1]
+    pixelCounts = abs(sum(B[0:int(rows), 0:int(cols)]))
+    num_pixels = 0
+    for i in pixelCounts:
+        num_pixels = num_pixels + i
+    print("num: " +str(num_pixels))
+    diff = compare_array_maps(A_rotated, B)
+    return diff/num_pixels 
+
+def find_best_rotation(A, B):
+    deg = 45
+    while deg < 360:
+        prop = check_rotation(A, B, deg)
+        print(str(deg) + ": " + str(prop))
+        deg = deg + 45
 
 # function that solves problems 
 def solve_problem(problem):
@@ -146,8 +175,7 @@ def print_answers(answers):
     for answer in answers:
         print("Answer " + str(answer))
 
-# Main function to solve geometric analogy problems
-def main():
+def solve_all_problems():
     correct_answers = [2,2,4,4,3,1,1,2,5,5,3,3,2,4,2]
     total_correct = 0
     for i in range(1,16):
@@ -162,6 +190,12 @@ def main():
             print("Problem " + problem + " answers (correct answer is " + str(correct_answers[i-1]) + '):')
             print_answers(answers)
     print("Total Correct: " + str(total_correct))
+
+
+# Main function to solve geometric analogy problems
+def main():
+    solve_all_problems()
+    
     ################ ANSWERS ###############
     # Problem 1 Answer: 2 *
     # Problem 2 Answer: 2 *

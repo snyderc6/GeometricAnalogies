@@ -33,19 +33,6 @@ def convert_to_array_map(image):
     array_map = 1 - array_map
     return array_map
 
-# function that returns the number of matching pixels
-def compare_array_maps(image1, image2):
-    diff = image2-image1
-    rows = diff.shape[0]
-    cols = diff.shape[1]
-    counts = abs(sum(diff[0:int(rows), 0:int(cols)]))
-    totalMatching = 0
-    for i in counts:
-        if counts[i] == 0:
-            totalMatching = totalMatching + 1
-    return totalMatching
-
-
 
 # function to get images to array maps
 def images_to_array_maps(A, B, C, a1, a2, a3, a4, a5):
@@ -122,30 +109,49 @@ def best_answer(compare_map):
 
     return min_idx
 
+#function that returns the number of 1 pixels in an image
+def count_pixels(image):
+    pixel_count = 0
+    for i in range (len(image[0])):
+        pixel_count = pixel_count + sum(image[i])
+    return pixel_count
+
 # function that attempts to rotate the image A to match image B
 # returns the proportion of matching pixels
 def check_rotation(A, B, rot_degree):
-
+    #if the deg rotated is divisible by 45, 612 pixels are added
+    #to the rotation (because the image is a square 59x59 pixel img)   
     # rotate A
     A_rotated = A.rotate(rot_degree)
     A_rotated = convert_to_array_map(A_rotated)
     B = convert_to_array_map(B)
-    rows = B.shape[0]
-    cols = B.shape[1]
-    pixelCounts = abs(sum(B[0:int(rows), 0:int(cols)]))
-    num_pixels = 0
-    for i in pixelCounts:
-        num_pixels = num_pixels + i
-    print("num: " +str(num_pixels))
-    diff = compare_array_maps(A_rotated, B)
-    return diff/num_pixels 
+    num_pixels_B = count_pixels(B)
+    num_total_pos_pixels = len(A_rotated)*len(B[0])
+    diff = count_pixels(B-A_rotated)
+    if rot_degree % 45 == 0:
+        diff = diff + 612
+    return (num_total_pos_pixels-abs(diff))/num_total_pos_pixels
 
+#return the values of the best rotation and best proportion value
 def find_best_rotation(A, B):
+    best_rot = 0
+    best_rot_val = check_rotation(A,B,0)
     deg = 45
     while deg < 360:
         prop = check_rotation(A, B, deg)
-        print(str(deg) + ": " + str(prop))
+        if(best_rot_val < prop):
+            best_rot = deg
+            best_rot_val = prop
+        #print(str(deg) + ": " + str(prop))
         deg = deg + 45
+    return best_rot, best_rot_val
+
+#function that returns the the c
+def rot_answers(best_rot, C, a1, a2, a3, a4, a5):
+    answers = [check_rotation(C,a1,best_rot), check_rotation(C, a2, best_rot), \
+        check_rotation(C,a3, best_rot),check_rotation(C,a4,best_rot), \
+        check_rotation(C,a5, best_rot)]
+    return answers
 
 # function that solves problems 
 def solve_problem(problem):
@@ -155,14 +161,20 @@ def solve_problem(problem):
     # read in images for problem
     A, B, C, a1, a2, a3, a4, a5 = read_in_images(path)
     # find rotations if any from A -> B
+    best_rot, best_rot_val = find_best_rotation(A,B)
+    if best_rot_val > .998:
+        choices = rot_answers(best_rot, C, a1, a2, a3, a4, a5)
+        choice = np.argsort(choices)+1
+        choice = np.fliplr([choice])[0]
+    else:
 
-    # find flips if any from A -> B
+         # find flips if any from A -> B
 
-    # analyze additions/subtractions/movements by quadrant
-    compare_map = analyze_differences(A, B, C, a1, a2, a3, a4, a5)
+         # analyze additions/subtractions/movements by quadrant
+        compare_map = analyze_differences(A, B, C, a1, a2, a3, a4, a5)
+        # choose best answer
+        choice = best_answer(compare_map)
 
-    # choose best answer
-    choice = best_answer(compare_map)
     #print(problem + " answer in order of highest matching:")
     answers = []
     for c in choice:
@@ -195,7 +207,6 @@ def solve_all_problems():
 # Main function to solve geometric analogy problems
 def main():
     solve_all_problems()
-    
     ################ ANSWERS ###############
     # Problem 1 Answer: 2 *
     # Problem 2 Answer: 2 *

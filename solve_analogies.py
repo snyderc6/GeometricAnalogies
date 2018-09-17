@@ -203,10 +203,22 @@ def solve_all_problems():
             print_answers(answers)
     print("Total Correct: " + str(total_correct))
 
+def solve_one_problem(problem):
+    correct_answers = [2,2,4,4,3,1,1,2,5,5,3,3,2,4,2]
+    problem_string = 'm' + str(problem)
+    answers = solve_problem(problem_string)
+    if(answers[0] == correct_answers[problem-1]):
+        #system got the answer correct
+        print("Problem " + str(problem) + " answered correctly!")
+    else:
+        #system got the answer wrong
+        print("Problem " + str(problem) + " answers (correct answer is " + str(correct_answers[problem-1]) + '):')
+        print_answers(answers)
 
 # Main function to solve geometric analogy problems
 def main():
-    solve_all_problems()
+    #solve_all_problems()
+    solve_one_problem(6)
     ################ ANSWERS ###############
     # Problem 1 Answer: 2 *
     # Problem 2 Answer: 2 *

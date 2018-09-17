@@ -128,7 +128,7 @@ def check_rotation(A, B, rot_degree):
     num_pixels_B = count_pixels(B)
     num_total_pos_pixels = len(A_rotated)*len(B[0])
     diff = count_pixels(B-A_rotated)
-    if rot_degree % 45 == 0:
+    if (rot_degree == 45 | rot_degree == 135 | rot_degree == 225):
         diff = diff + 612
     return (num_total_pos_pixels-abs(diff))/num_total_pos_pixels
 

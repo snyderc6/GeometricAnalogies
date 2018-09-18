@@ -1,4 +1,4 @@
-
+from __future__ import division
 #######################################
 # IMAGERY IN AI
 # ASSIGNMENT 1 - GEOMETRIC ANALOGIES
@@ -11,7 +11,7 @@
 import os
 from PIL import Image
 import numpy as np
-
+import csv
 
 # function to read in all 8 images from problem
 def read_in_images(path):
@@ -119,7 +119,7 @@ def count_pixels(image):
 # function that attempts to rotate the image A to match image B
 # returns the proportion of matching pixels
 def check_rotation(A, B, rot_degree):
-    #if the deg rotated is divisible by 45, 612 pixels are added
+    #if the deg rotated is divisible by 45, 615 pixels are added
     #to the rotation (because the image is a square 59x59 pixel img)   
     # rotate A
     A_rotated = A.rotate(rot_degree)
@@ -127,15 +127,53 @@ def check_rotation(A, B, rot_degree):
     B = convert_to_array_map(B)
     num_pixels_B = count_pixels(B)
     num_total_pos_pixels = len(A_rotated)*len(B[0])
-    diff = count_pixels(B-A_rotated)
-    if (rot_degree == 45 | rot_degree == 135 | rot_degree == 225):
-        diff = diff + 612
-    return (num_total_pos_pixels-abs(diff))/num_total_pos_pixels
+    diff = count_pixels(abs(B-A_rotated))
+    diff = check_shifts(A_rotated,B)
+   # print(str(rot_degree) + ":" + str(diff))
+    if (rot_degree == 45 or rot_degree == 135 or rot_degree == 225):
+        #print("in here")
+        diff = diff - 615
+    #print(str(rot_degree) + ":" + str(diff))
+    #print((num_total_pos_pixels-diff)/num_total_pos_pixels)
+    return ((num_total_pos_pixels-abs(diff))/num_total_pos_pixels)
+    #return diff
+
+def check_yshifts(A,B):
+    best_shifted_img = 9999999999
+    best_shift_val = 9999999999999
+    for i in range(0,7):
+        A_roll = np.roll(A, -i, axis = 1)
+        num_total_pos_pixels = len(A)*len(B[0])
+        diff = count_pixels(abs(B-A_roll))
+        if best_shift_val > diff:
+            best_shift_val = diff
+            best_shifted_img = A_roll
+        #print("diff" + str(i) + ": "  + str(diff))
+        #print("best: " + str(best_shift_val))
+   # print("shift picked: " + str(best_shift))
+    return A_roll
+
+def check_shifts(A, B):
+    best_shift = 9999999999
+    best_shift_val = 9999999999999
+    for i in range(0,7):
+        A_yroll = check_yshifts(A,B)
+        A_roll = np.roll(A_yroll, -i, axis = 0)
+        num_total_pos_pixels = len(A)*len(B[0])
+        diff = count_pixels(abs(B-A_roll))
+        if best_shift_val > diff:
+            best_shift_val = diff
+            best_shift = -i
+        #print("diff" + str(i) + ": "  + str(diff))
+        #print("best: " + str(best_shift_val))
+    #print("shift picked: " + str(best_shift))
+    return best_shift_val
+
 
 #return the values of the best rotation and best proportion value
 def find_best_rotation(A, B):
     best_rot = 0
-    best_rot_val = check_rotation(A,B,0)
+    best_rot_val = 0
     deg = 45
     while deg < 360:
         prop = check_rotation(A, B, deg)
@@ -144,7 +182,9 @@ def find_best_rotation(A, B):
             best_rot_val = prop
         #print(str(deg) + ": " + str(prop))
         deg = deg + 45
+   # print("rotation picked: " + str(best_rot))
     return best_rot, best_rot_val
+
 
 #function that returns the the c
 def rot_answers(best_rot, C, a1, a2, a3, a4, a5):
@@ -162,7 +202,9 @@ def solve_problem(problem):
     A, B, C, a1, a2, a3, a4, a5 = read_in_images(path)
     # find rotations if any from A -> B
     best_rot, best_rot_val = find_best_rotation(A,B)
-    if best_rot_val > .998:
+    #print("best: " + str(best_rot))
+    #print("best val: " + str(best_rot_val))
+    if best_rot_val > .94:
         choices = rot_answers(best_rot, C, a1, a2, a3, a4, a5)
         choice = np.argsort(choices)+1
         choice = np.fliplr([choice])[0]
@@ -215,10 +257,20 @@ def solve_one_problem(problem):
         print("Problem " + str(problem) + " answers (correct answer is " + str(correct_answers[problem-1]) + '):')
         print_answers(answers)
 
+
+def test1():
+    problem = "m2"
+    basedir = '/Users/Caitlin/Desktop/Imagery in AI/Project 1/'
+    path = os.path.join(basedir, 'analogy problems 1-15', problem)
+    # read in images for problem
+    A, B, C, a1, a2, a3, a4, a5 = read_in_images(path)
+
+
 # Main function to solve geometric analogy problems
 def main():
-    #solve_all_problems()
-    solve_one_problem(6)
+    solve_all_problems()
+    #solve_one_problem(2)
+    #test()
     ################ ANSWERS ###############
     # Problem 1 Answer: 2 *
     # Problem 2 Answer: 2 *

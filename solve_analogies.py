@@ -244,13 +244,6 @@ def find_answers(A,B,C,a1,a2,a3,a4,a5):
         check_difference(AB_diff,C,a5)]
     return answers
 
-def check_difference(AB_diff, image1, image2):
-    image1 = convert_to_array_map(image1)
-    image2 = convert_to_array_map(image2)
-    diff = abs(image1-image2)
-    total_diff = abs(AB_diff - diff)
-    return count_pixels(total_diff)
-
 
 # function that solves problems 
 def solve_problem(problem):
@@ -263,6 +256,8 @@ def solve_problem(problem):
     best_rot, best_rot_val = find_best_rotation(A,B)
     #print("best: " + str(best_rot))
     #print("best val: " + str(best_rot_val))
+    #print(best_rot_val)
+   # print(best_rot)
     if best_rot_val > .94:
         print("using rotation to solve")
         choices = rot_answers(best_rot, C, a1, a2, a3, a4, a5)
@@ -356,7 +351,7 @@ def test():
 # Main function to solve geometric analogy problems
 def main():
     solve_all_problems()
-    #solve_one_problem(12)
+    #solve_one_problem(14)
     #test1()
     ################ ANSWERS ###############
     # Problem 1 Answer: 2 *

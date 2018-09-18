@@ -141,6 +141,7 @@ def check_rotation(A, B, rot_degree):
 def check_yshifts(A,B):
     best_shifted_img = 9999999999
     best_shift_val = 9999999999999
+    best_shift = 0
     for i in range(0,7):
         A_roll = np.roll(A, -i, axis = 1)
         num_total_pos_pixels = len(A)*len(B[0])
@@ -148,10 +149,27 @@ def check_yshifts(A,B):
         if best_shift_val > diff:
             best_shift_val = diff
             best_shifted_img = A_roll
+            best_shift = i
+        #print("diff" + str(i) + ": "  + str(diff))
+        #print("best: " + str(best_shift_val))
+    #print("shift picked: " + str(best_shift))
+    return A_roll
+def check_xshifts(A,B):
+    best_shift = 9999999999
+    best_shift_val = 9999999999999
+    for i in range(0,7):
+       # A_yroll = check_yshifts(A,B)
+        A_roll = np.roll(A, -i, axis = 0)
+        num_total_pos_pixels = len(A)*len(B[0])
+        diff = count_pixels(abs(B-A_roll))
+        if best_shift_val > diff:
+            best_shift_val = diff
+            best_shift = -i
         #print("diff" + str(i) + ": "  + str(diff))
         #print("best: " + str(best_shift_val))
    # print("shift picked: " + str(best_shift))
-    return A_roll
+    return best_shift_val
+
 
 def check_shifts(A, B):
     best_shift = 9999999999
@@ -166,9 +184,19 @@ def check_shifts(A, B):
             best_shift = -i
         #print("diff" + str(i) + ": "  + str(diff))
         #print("best: " + str(best_shift_val))
-    #print("shift picked: " + str(best_shift))
+   # print("shift picked: " + str(best_shift))
     return best_shift_val
 
+def check_flips(A, B, flip_type):
+    A_flipped = A.transpose(flip_type)
+    A_flipped = convert_to_array_map(A_flipped)
+    B = convert_to_array_map(B)
+    num_pixels_B = count_pixels(B)
+    num_total_pos_pixels = len(A_flipped)*len(B[0])
+    diff = count_pixels(abs(B-A_flipped))
+    diff = check_xshifts(A_flipped,B)
+    #print(diff)
+    return ((num_total_pos_pixels-abs(diff))/num_total_pos_pixels)
 
 #return the values of the best rotation and best proportion value
 def find_best_rotation(A, B):
@@ -185,6 +213,13 @@ def find_best_rotation(A, B):
    # print("rotation picked: " + str(best_rot))
     return best_rot, best_rot_val
 
+def find_best_flip(A,B):
+    flip_value_l_r = check_flips(A,B,Image.FLIP_LEFT_RIGHT)
+    flip_value_t_b = check_flips(A,B,Image.FLIP_TOP_BOTTOM)
+    if(flip_value_l_r > flip_value_t_b):
+        return Image.FLIP_LEFT_RIGHT, flip_value_l_r
+    else:
+        return Image.FLIP_TOP_BOTTOM, flip_value_t_b
 
 #function that returns the the c
 def rot_answers(best_rot, C, a1, a2, a3, a4, a5):
@@ -192,6 +227,30 @@ def rot_answers(best_rot, C, a1, a2, a3, a4, a5):
         check_rotation(C,a3, best_rot),check_rotation(C,a4,best_rot), \
         check_rotation(C,a5, best_rot)]
     return answers
+
+def flip_answers(best_flip, C, a1, a2, a3, a4, a5):
+    answers = [check_flips(C,a1,best_flip), check_flips(C, a2, best_flip), \
+        check_flips(C,a3, best_flip),check_flips(C,a4,best_flip), \
+        check_flips(C,a5, best_flip)]
+    #print(answers)
+    return answers
+
+def find_answers(A,B,C,a1,a2,a3,a4,a5):
+    A = convert_to_array_map(A)
+    B = convert_to_array_map(B)
+    AB_diff = abs(A-B)
+    answers = [check_difference(AB_diff,C,a1), check_difference(AB_diff,C,a2), \
+        check_difference(AB_diff,C,a3),check_difference(AB_diff,C,a4), \
+        check_difference(AB_diff,C,a5)]
+    return answers
+
+def check_difference(AB_diff, image1, image2):
+    image1 = convert_to_array_map(image1)
+    image2 = convert_to_array_map(image2)
+    diff = abs(image1-image2)
+    total_diff = abs(AB_diff - diff)
+    return count_pixels(total_diff)
+
 
 # function that solves problems 
 def solve_problem(problem):
@@ -205,17 +264,27 @@ def solve_problem(problem):
     #print("best: " + str(best_rot))
     #print("best val: " + str(best_rot_val))
     if best_rot_val > .94:
+        print("using rotation to solve")
         choices = rot_answers(best_rot, C, a1, a2, a3, a4, a5)
         choice = np.argsort(choices)+1
         choice = np.fliplr([choice])[0]
     else:
-
          # find flips if any from A -> B
+        best_flip, best_flip_val = find_best_flip(A,B)
+        if(best_flip_val) > 0.93:
+            print("using flipping to solve")
+            choices = flip_answers(best_flip, C, a1, a2, a3, a4, a5)
+            choice = np.argsort(choices)+1
+            choice = np.fliplr([choice])[0]
+        else:
+            #choices = find_answers(A,B,C,a1, a2, a3, a4, a5)
+            #choice = np.argsort(choices)+1
+            #choice = np.fliplr([choice])[0]
 
-         # analyze additions/subtractions/movements by quadrant
-        compare_map = analyze_differences(A, B, C, a1, a2, a3, a4, a5)
-        # choose best answer
-        choice = best_answer(compare_map)
+            # analyze additions/subtractions/movements by quadrant
+            compare_map = analyze_differences(A, B, C, a1, a2, a3, a4, a5)
+            # choose best answer
+            choice = best_answer(compare_map)
 
     #print(problem + " answer in order of highest matching:")
     answers = []
@@ -259,18 +328,36 @@ def solve_one_problem(problem):
 
 
 def test1():
-    problem = "m2"
+    problem = "m12"
     basedir = '/Users/Caitlin/Desktop/Imagery in AI/Project 1/'
     path = os.path.join(basedir, 'analogy problems 1-15', problem)
     # read in images for problem
     A, B, C, a1, a2, a3, a4, a5 = read_in_images(path)
+    A_flipped = C.transpose(Image.FLIP_LEFT_RIGHT)
+    A_flipped = convert_to_array_map(A_flipped)
+    B = convert_to_array_map(a3)
+    print(check_shifts(A_flipped,B))
+    #A_roll = np.roll(A_flipped, -6, axis = 0)
+    sep = abs(B-A_flipped)
+    print(count_pixels(sep))
+    with open("output.csv", "w") as f:
+        writer = csv.writer(f)
+        writer.writerows(sep)
 
+def test():
+    problem = "m12"
+    basedir = '/Users/Caitlin/Desktop/Imagery in AI/Project 1/'
+    path = os.path.join(basedir, 'analogy problems 1-15', problem)
+    # read in images for problem
+    A, B, C, a1, a2, a3, a4, a5 = read_in_images(path)
+    direc, flip_value = find_best_flip(C,a2)
+    print(flip_value)
 
 # Main function to solve geometric analogy problems
 def main():
     solve_all_problems()
-    #solve_one_problem(2)
-    #test()
+    #solve_one_problem(12)
+    #test1()
     ################ ANSWERS ###############
     # Problem 1 Answer: 2 *
     # Problem 2 Answer: 2 *
